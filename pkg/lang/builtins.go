@@ -201,20 +201,34 @@ func GoSetMapIndex(m, k, v interface{}) {
 }
 
 func GoSlice(slc interface{}, indices ...interface{}) interface{} {
-	slcVal := reflect.ValueOf(slc)
-	i := 0
-	j := slcVal.Len()
-
-	if len(indices) > 2 {
-		panic(fmt.Errorf("slice: too many indices %d", len(indices)))
-	}
 	if len(indices) == 0 {
 		panic(fmt.Errorf("slice: no indices"))
 	}
-	if len(indices) >= 1 {
+	if len(indices) > 2 {
+		panic(fmt.Errorf("slice: too many indices %d", len(indices)))
+	}
+
+	// Fast path for strings — avoid reflect overhead.
+	if s, ok := slc.(string); ok {
+		i := 0
 		if !IsNil(indices[0]) {
 			i = MustAsInt(indices[0])
 		}
+		if len(indices) == 2 {
+			j := len(s)
+			if !IsNil(indices[1]) {
+				j = MustAsInt(indices[1])
+			}
+			return s[i:j]
+		}
+		return s[i:]
+	}
+
+	slcVal := reflect.ValueOf(slc)
+	i := 0
+	j := slcVal.Len()
+	if !IsNil(indices[0]) {
+		i = MustAsInt(indices[0])
 	}
 	if len(indices) == 2 {
 		if !IsNil(indices[1]) {
