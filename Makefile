@@ -250,7 +250,7 @@ release: $(GH)
 	$(MAKE) glj-imports force=1
 	$(MAKE) build
 	$(MAKE) test
-	git add pkg/stdlib/ pkg/gen/gljimports/
+	git add -A
 	git diff --cached --quiet || \
 	  git commit -m "Builds for v$(RELEASE_VER)"
 	$(MAKE) release-dist VERSION=$(VERSION)
