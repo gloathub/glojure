@@ -5652,18 +5652,18 @@ func LoadNS() {
 				_ = v11
 				var tmp12 any
 				{ // let
-					// let binding "seq_738"
+					// let binding "seq_736"
 					tmp13 := checkDerefVar(var_clojure_DOT_core_seq)
 					tmp14 := lang.Apply1(tmp13, v3)
 					var v15 any = tmp14
 					_ = v15
-					// let binding "chunk_739"
+					// let binding "chunk_737"
 					var v16 any = nil
 					_ = v16
-					// let binding "count_740"
+					// let binding "count_738"
 					var v17 any = int64(0)
 					_ = v17
-					// let binding "i_741"
+					// let binding "i_739"
 					var v18 any = int64(0)
 					_ = v18
 					for {
@@ -5734,7 +5734,7 @@ func LoadNS() {
 								if lang.IsTruthy(v26) {
 									var tmp28 any
 									{ // let
-										// let binding "seq_738"
+										// let binding "seq_736"
 										var v29 any = v26
 										_ = v29
 										var tmp30 any

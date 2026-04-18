@@ -71,6 +71,10 @@ func (e *Error) Error() string {
 	return e.msg
 }
 
+// GetStackTrace returns nil (Go errors don't carry Java-style stack traces).
+// This satisfies Clojure core's (.getStackTrace ex) calls.
+func (e *Error) GetStackTrace() any { return nil }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // NewTimeoutError creates a new timeout error.
@@ -82,6 +86,8 @@ func NewTimeoutError(msg string) error {
 func (e *TimeoutError) Error() string {
 	return e.msg
 }
+
+func (e *TimeoutError) GetStackTrace() any { return nil }
 
 func (e *TimeoutError) Is(other error) bool {
 	_, ok := other.(*TimeoutError)
@@ -98,6 +104,8 @@ func (e *IndexOutOfBoundsError) Error() string {
 	return "index out of bounds"
 }
 
+func (e *IndexOutOfBoundsError) GetStackTrace() any { return nil }
+
 func (e *IndexOutOfBoundsError) Is(other error) bool {
 	_, ok := other.(*IndexOutOfBoundsError)
 	return ok
@@ -112,6 +120,8 @@ func NewIllegalArgumentError(msg string) error {
 func (e *IllegalArgumentError) Error() string {
 	return e.msg
 }
+
+func (e *IllegalArgumentError) GetStackTrace() any { return nil }
 
 func (e *IllegalArgumentError) Is(other error) bool {
 	_, ok := other.(*IllegalArgumentError)
@@ -128,6 +138,8 @@ func (e *UnsupportedOperationError) Error() string {
 	return e.msg
 }
 
+func (e *UnsupportedOperationError) GetStackTrace() any { return nil }
+
 func (e *UnsupportedOperationError) Is(other error) bool {
 	_, ok := other.(*UnsupportedOperationError)
 	return ok
@@ -143,6 +155,8 @@ func (e *ArithmeticError) Error() string {
 	return e.msg
 }
 
+func (e *ArithmeticError) GetStackTrace() any { return nil }
+
 func (e *ArithmeticError) Is(other error) bool {
 	_, ok := other.(*ArithmeticError)
 	return ok
@@ -157,6 +171,8 @@ func NewIllegalStateError(msg string) error {
 func (e *IllegalStateError) Error() string {
 	return e.msg
 }
+
+func (e *IllegalStateError) GetStackTrace() any { return nil }
 
 func (e *IllegalStateError) Is(other error) bool {
 	_, ok := other.(*IllegalStateError)
@@ -177,6 +193,8 @@ func NewCompilerError(file string, line, col int, err error) error {
 func (e *CompilerError) Error() string {
 	return fmt.Sprintf("compiler error at %s:%d:%d: %v", e.file, e.line, e.col, e.err)
 }
+
+func (e *CompilerError) GetStackTrace() any { return nil }
 
 ////////////////////////////////////////////////////////////////////////////////
 // TODO: Revisit
@@ -215,6 +233,9 @@ func (e *EvalError) Error() string {
 func (e *EvalError) Stack() []StackFrame {
 	return e.stack
 }
+
+// GetStackTrace returns nil (Go errors don't carry Java-style stack traces).
+func (e *EvalError) GetStackTrace() any { return nil }
 
 // AddStack adds a new stack trace entry.
 func (e *EvalError) AddStack(frame StackFrame) error {

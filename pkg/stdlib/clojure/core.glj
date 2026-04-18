@@ -4840,12 +4840,8 @@
 
 (defn ^:private elide-top-frames
   [^go/any ex class-name]
-  (let [tr (.getStackTrace ex)]
-    (doto ex
-      (.setStackTrace
-        (when tr
-          (into-array StackTraceElement
-            (drop-while #(= class-name (.getClassName ^StackTraceElement %1)) tr)))))))
+  ;; Go errors don't carry Java-style stack traces; return ex unchanged.
+  ex)
 
 (defn ex-info "Create an instance of ExceptionInfo, a RuntimeException subclass
    that carries a map of additional data." {:added "1.4"} ([msg map] (github.com:gloathub:glojure:pkg:lang.NewExceptionInfo msg map)) ([msg map cause] (github.com:gloathub:glojure:pkg:lang.NewExceptionInfoWithCause msg map cause)))
@@ -5881,15 +5877,11 @@
   [pred fmt & args]
   (when pred
     (let [^go/string message (apply format fmt args)
-          exception (github.com:gloathub:glojure:pkg:lang.NewError message)
-          raw-trace (.getStackTrace exception)
-          boring? #(not= (.getMethodName ^StackTraceElement %) "doInvoke")
-          trace (into-array StackTraceElement (drop 2 (drop-while boring? raw-trace)))]
-      (.setStackTrace exception trace)
+          exception (github.com:gloathub:glojure:pkg:lang.NewError message)]
       (throw (github.com:gloathub:glojure:pkg:lang.NewCompilerError
               *file*
-              (.Deref clojure.lang.Compiler/LINE)
-              (.Deref clojure.lang.Compiler/COLUMN)
+              0
+              0
               exception)))))
 
 (defn- libspec?

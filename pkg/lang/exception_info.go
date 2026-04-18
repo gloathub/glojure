@@ -52,6 +52,9 @@ func (e *ExceptionInfo) Cause() error {
 	return e.cause
 }
 
+// GetStackTrace returns nil (Go errors don't carry Java-style stack traces).
+func (e *ExceptionInfo) GetStackTrace() any { return nil }
+
 func (e *ExceptionInfo) Is(target error) bool {
 	_, ok := target.(*ExceptionInfo)
 	return ok
