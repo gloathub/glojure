@@ -52,7 +52,7 @@ func (a *Atom) RemoveWatch(key interface{}) {
 
 func (a *Atom) notifyWatches(oldVal, newVal interface{}) {
 	watches := a.watches
-	if watches == nil || watches.Count() == 0 {
+	if watches == nil || watches == emptyMap {
 		return
 	}
 

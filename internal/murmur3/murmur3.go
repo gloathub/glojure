@@ -90,3 +90,36 @@ func fmix(h1, length uint32) uint32 {
 	h1 ^= h1 >> 16
 	return h1
 }
+
+// HashString hashes a string using murmur3, processing 4 bytes at a time.
+func HashString(s string) uint32 {
+	h1 := uint32(seed)
+	length := len(s)
+
+	// Process 4-byte chunks
+	nblocks := length / 4
+	for i := 0; i < nblocks; i++ {
+		off := i * 4
+		k1 := uint32(s[off]) | uint32(s[off+1])<<8 | uint32(s[off+2])<<16 | uint32(s[off+3])<<24
+		k1 = mixK1(k1)
+		h1 = mixH1(h1, k1)
+	}
+
+	// Process remaining bytes
+	tail := nblocks * 4
+	var k1 uint32
+	switch length & 3 {
+	case 3:
+		k1 ^= uint32(s[tail+2]) << 16
+		fallthrough
+	case 2:
+		k1 ^= uint32(s[tail+1]) << 8
+		fallthrough
+	case 1:
+		k1 ^= uint32(s[tail])
+		k1 = mixK1(k1)
+		h1 ^= k1
+	}
+
+	return fmix(h1, uint32(length))
+}

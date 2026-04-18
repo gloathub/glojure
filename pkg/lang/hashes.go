@@ -10,8 +10,6 @@ import (
 	"unsafe"
 
 	hash2 "bitbucket.org/pcastools/hash"
-	"github.com/mitchellh/hashstructure/v2"
-
 	"github.com/gloathub/glojure/internal/murmur3"
 )
 
@@ -128,11 +126,7 @@ func uint32ToBytes(i uint32) []byte {
 }
 
 func hashString(s string) uint32 {
-	h, err := hashstructure.Hash(s, hashstructure.FormatV2, nil)
-	if err != nil {
-		panic(err)
-	}
-	return uint32(h)
+	return murmur3.HashString(s)
 }
 
 func hashPtr(ptr uintptr) uint32 {

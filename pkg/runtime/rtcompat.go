@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"unicode/utf8"
 
 	"github.com/gloathub/glojure/pkg/lang"
 	"github.com/gloathub/glojure/pkg/reader"
@@ -140,20 +141,61 @@ func (rt *RTMethods) Contains(coll, key any) bool {
 	panic(fmt.Errorf("contains? not supported on type: %T", coll))
 }
 
+// runeIndexToByteIndex converts a rune index to a byte index in s.
+// For pure-ASCII strings this is a direct return of idx (O(1)).
+// For strings with multi-byte characters it walks only the non-ASCII
+// prefixes.
+func runeIndexToByteIndex(s string, idx int) int {
+	if idx == 0 {
+		return 0
+	}
+	// Fast path: if idx is within bounds and all bytes so far are ASCII,
+	// the byte position equals the rune position.
+	if idx <= len(s) {
+		bytePos := 0
+		for i := 0; i < idx; i++ {
+			if bytePos >= len(s) {
+				return -1 // out of range
+			}
+			if s[bytePos] < 0x80 {
+				bytePos++
+			} else {
+				_, size := utf8.DecodeRuneInString(s[bytePos:])
+				bytePos += size
+			}
+		}
+		return bytePos
+	}
+	return -1
+}
+
 func (rt *RTMethods) Subs(s string, start int) string {
-	runes := []rune(s)
-	if start < 0 || start > len(runes) {
+	if start < 0 {
 		panic(lang.NewIllegalArgumentError("String index out of range"))
 	}
-	return string(runes[start:])
+	if start == 0 {
+		return s
+	}
+	bytePos := runeIndexToByteIndex(s, start)
+	if bytePos < 0 || bytePos > len(s) {
+		panic(lang.NewIllegalArgumentError("String index out of range"))
+	}
+	return s[bytePos:]
 }
 
 func (rt *RTMethods) SubsEnd(s string, start, end int) string {
-	runes := []rune(s)
-	if start < 0 || start > len(runes) || end < start || end > len(runes) {
+	if start < 0 || end < start {
 		panic(lang.NewIllegalArgumentError("String index out of range"))
 	}
-	return string(runes[start:end])
+	startByte := runeIndexToByteIndex(s, start)
+	if startByte < 0 {
+		panic(lang.NewIllegalArgumentError("String index out of range"))
+	}
+	endByte := runeIndexToByteIndex(s, end)
+	if endByte < 0 || endByte > len(s) {
+		panic(lang.NewIllegalArgumentError("String index out of range"))
+	}
+	return s[startByte:endByte]
 }
 
 func (rt *RTMethods) Subvec(v IPersistentVector, start, end any) IPersistentVector {
