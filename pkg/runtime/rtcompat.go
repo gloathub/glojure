@@ -142,31 +142,22 @@ func (rt *RTMethods) Contains(coll, key any) bool {
 }
 
 // runeIndexToByteIndex converts a rune index to a byte index in s.
-// For pure-ASCII strings this is a direct return of idx (O(1)).
-// For strings with multi-byte characters it walks only the non-ASCII
-// prefixes.
+// Walks bytes, using single-byte increment for ASCII. O(n) in the
+// worst case but fast for pure-ASCII strings.
 func runeIndexToByteIndex(s string, idx int) int {
-	if idx == 0 {
-		return 0
-	}
-	// Fast path: if idx is within bounds and all bytes so far are ASCII,
-	// the byte position equals the rune position.
-	if idx <= len(s) {
-		bytePos := 0
-		for i := 0; i < idx; i++ {
-			if bytePos >= len(s) {
-				return -1 // out of range
-			}
-			if s[bytePos] < 0x80 {
-				bytePos++
-			} else {
-				_, size := utf8.DecodeRuneInString(s[bytePos:])
-				bytePos += size
-			}
+	bytePos := 0
+	for i := 0; i < idx; i++ {
+		if bytePos >= len(s) {
+			return -1
 		}
-		return bytePos
+		if s[bytePos] < 0x80 {
+			bytePos++
+		} else {
+			_, size := utf8.DecodeRuneInString(s[bytePos:])
+			bytePos += size
+		}
 	}
-	return -1
+	return bytePos
 }
 
 func (rt *RTMethods) Subs(s string, start int) string {
